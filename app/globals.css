@@ -8,18 +8,17 @@ html {
 
 body {
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Subtle gradient for hero background */
-.hero-gradient {
-  background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 50%, #020617 100%);
+html.light body {
+  background: #fafafa;
+  color: #09090b;
 }
 
-/* Glass card */
-.glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+html.dark body {
+  background: #0a0a0a;
+  color: #fafafa;
 }
 
 /* Hide scrollbar for carousels */
@@ -29,4 +28,20 @@ body {
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Hexagon shape helper */
+.hexagon {
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+@keyframes hexFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(-30px) rotate(5deg);
+    opacity: 0.7;
+  }
 }

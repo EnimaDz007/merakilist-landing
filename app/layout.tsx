@@ -13,14 +13,32 @@ export const metadata: Metadata = {
   },
 };
 
+// Runs before React hydrates → prevents white flash when dark mode is on
+const themeScript = `
+  (function() {
+    try {
+      var stored = localStorage.getItem('merakilist-theme');
+      var prefers = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var theme = stored || (prefers ? 'dark' : 'light');
+      document.documentElement.classList.remove('light', 'dark');
+      document.documentElement.classList.add(theme);
+    } catch (e) {
+      document.documentElement.classList.add('dark');
+    }
+  })();
+`;
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="antialiased bg-white text-slate-900">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
+      <body className="antialiased">
         {children}
         <Analytics />
       </body>
