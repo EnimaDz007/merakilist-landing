@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Analytics } from '@vercel/analytics/react';
+import { LanguageProvider } from './lib/LanguageProvider';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -13,15 +14,27 @@ export const metadata: Metadata = {
   },
 };
 
-// Runs before React hydrates → prevents white flash when dark mode is on
-const themeScript = `
+// Runs before React hydrates → sets theme, lang, and dir
+// BEFORE first paint. Prevents "flash of wrong content" for
+// dark-mode users and French/Arabic visitors.
+const preHydrationScript = `
   (function() {
     try {
-      var stored = localStorage.getItem('merakilist-theme');
-      var prefers = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      var theme = stored || (prefers ? 'dark' : 'light');
+      var theme = localStorage.getItem('merakilist-theme');
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var finalTheme = theme || (prefersDark ? 'dark' : 'light');
       document.documentElement.classList.remove('light', 'dark');
-      document.documentElement.classList.add(theme);
+      document.documentElement.classList.add(finalTheme);
+
+      var lang = localStorage.getItem('merakilist-lang');
+      if (!lang) {
+        var nav = (navigator.language || 'en').toLowerCase();
+        if (nav.indexOf('fr') === 0) lang = 'fr';
+        else if (nav.indexOf('ar') === 0) lang = 'ar';
+        else lang = 'en';
+      }
+      document.documentElement.lang = lang;
+      document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
     } catch (e) {
       document.documentElement.classList.add('dark');
     }
@@ -34,12 +47,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" dir="ltr" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script dangerouslySetInnerHTML={{ __html: preHydrationScript }} />
       </head>
       <body className="antialiased">
-        {children}
+        <LanguageProvider>
+          {children}
+        </LanguageProvider>
         <Analytics />
       </body>
     </html>
